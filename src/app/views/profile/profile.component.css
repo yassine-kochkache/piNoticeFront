@@ -1,0 +1,105 @@
+.showDalogBtn{
+    cursor: pointer;
+    color: #73818f !important;
+}
+.showDalogBtn:hover{
+    color: #4c5154 !important;
+}
+.selectField{
+    height: 50px;
+    margin-bottom: 10px;
+    width: 100%;
+    border-radius: 5px;
+    border:  1px solid rgb(226, 218, 218);
+}
+.selectField :focus{
+    border:  1px solid rgb(229, 221, 221);
+}
+.ownerImage{
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    box-shadow: 0 0 10px black;
+}
+.downloadImage{
+    width: 100px;
+    height: 100px;
+}
+.editBtn:hover{
+    transition: 0.6s;
+    background-color: green;
+    color: white !important;
+}
+.deleteBtn:hover{
+    transition: 0.6s;
+    background-color: red;
+    color: white !important;
+}
+.editBtn{
+    color: green; font-weight:bold; font-size: 20px; cursor: pointer; border-radius: 50%;
+}
+.deleteBtn{
+    color: red; font-weight:bold; font-size: 20px; cursor: pointer; border-radius: 50%
+}
+.postTypeContainer{
+    height: 400px;
+    overflow-y: scroll;
+}
+.addPostTpeBtn{
+    transition: 0.6s;
+}
+.addPostTpeBtn:hover{
+    color: white !important;
+    background-color: #3B82F6 !important;
+}
+.img-avatar{
+    box-shadow: 0 0 5px black;
+}
+.profileContainer{
+    min-height: 100vh;
+}
+.p-input-icon-left{
+    width: 200px !important;
+}
+.calendarField{
+    width: 100%;
+}
+::ng-deep .calendarField span{
+    width: 100%;
+}
+.profileImageContainer img{
+    width: 100px;
+    height: 100px;
+    box-shadow: 0 0 5px black;
+}
+img{
+    object-fit: cover !important
+}
+.profileImageContainer{
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    position: relative;
+}
+.cameraContainer{
+    background-color: white;
+    color: gray;
+    transition: 0.6s;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid gray;
+}
+.cameraContainer:hover{
+    color: white !important;
+    background-color: gray !important;
+}
+.dialogImageContainer img{
+    width: 100%;
+    height: auto;
+}

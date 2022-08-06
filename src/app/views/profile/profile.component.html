@@ -1,0 +1,529 @@
+<app-header
+  [navbarBrandRouterLink]="['/home']"
+  [fixed]="true"
+  [navbarBrandFull]="{
+    src: 'assets/img/brand/logo.svg',
+    width: 89,
+    height: 25,
+    alt: 'PiNotice logo'
+  }"
+  [navbarBrandMinimized]="{
+    src: 'assets/img/brand/sygnet.svg',
+    width: 30,
+    height: 30,
+    alt: 'PiNottice Logo'
+  }"
+  [sidebarToggler]="false"
+  [asideMenuToggler]="false"
+>
+  <ul class="nav navbar-nav d-md-down-none">
+    <li class="nav-item px-3">
+      <a class="nav-link" href="#/home">Home</a>
+    </li>
+    <li class="nav-item px-3">
+      <a class="nav-link" style="color: #73818f;cursor: pointer;" (click)="navigateProfile()"
+        >Profile</a
+      >
+    </li>
+  </ul>
+  <ul class="nav navbar-nav ml-auto">
+    <li
+      class="nav-item d-md-down-none"
+      *ngIf="connecteduser?._id == profileUser?._id"
+    >
+      <a class="nav-link mr-2 showDalogBtn" (click)="showAddDialog()"
+        ><i class="fa fa-plus"></i
+        ><span class="ml-2" style="font-weight: bold">Add New Post</span></a
+      >
+    </li>
+    <li class="nav-item dropdown" dropdown placement="bottom right">
+      <a
+        class="nav-link"
+        data-toggle="dropdown"
+        href="#"
+        role="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+        dropdownToggle
+        (click)="(false)"
+      >
+        <img
+          *ngIf="connecteduser"
+          src="{{ baseUrl }}/avatar/{{ connecteduser?.avatar }}"
+          class="img-avatar"
+          alt="admin@bootstrapmaster.com"
+        />
+      </a>
+      <div
+        class="dropdown-menu dropdown-menu-right"
+        *dropdownMenu
+        aria-labelledby="simple-dropdown"
+      >
+        <div class="dropdown-header text-center"><strong>Settings</strong></div>
+        <a class="dropdown-item" (click)="navigateProfile()"
+          ><i class="fa fa-user"></i> Profile</a
+        >
+        <a class="dropdown-item" href="#/updatePassword"
+          ><i class="fa fa-wrench"></i> Update password</a
+        >
+        <div class="divider"></div>
+        <a class="dropdown-item" (click)="logout()"
+          ><i class="fa fa-lock"></i> Logout</a
+        >
+      </div>
+    </li>
+  </ul>
+</app-header>
+<br />
+<div class="container rounded profileContainer bg-white mt-5 mb-5">
+  <div class="row profileContainer">
+    <div class="col-md-2 border-right">
+      <div class="d-flex flex-column align-items-center text-center p-3">
+        <div class="profileImageContainer">
+          <img
+            *ngIf="profileUser"
+            class="rounded-circle mt-5"
+            width="150px"
+            src="{{ baseUrl }}/avatar/{{ profileUser?.avatar }}"
+          />
+          <span class="cameraContainer" (click)="openUpdateImageDial()">
+            <span class="fa fa-camera"></span>
+          </span>
+        </div>
+        <br />
+        <span class="font-weight-bold"
+          >{{ profileUser?.firstName }} {{ profileUser?.lastName }}</span
+        ><span class="text-black-50">{{ profileUser?.address }}</span
+        ><span class="text-black-50"
+          >Posts count :
+          <strong>{{ profileUser?.events?.length }}</strong> </span
+        ><span> </span>
+        <span
+          *ngIf="connecteduser?._id == profileUser?._id"
+          class="font-weight-bold pt-2"
+          (click)="showUpdateProfileFunc()"
+          style="color: rgb(50, 188, 50); cursor: pointer"
+          ><span class="fa fa-edit"></span>
+          <strong>Update profile</strong></span
+        >
+      </div>
+    </div>
+    <div class="col-md-7 border-right">
+      <div class="p-1" *ngIf="profileUser?.events.length > 0">
+        <div
+          *ngFor="
+            let post of profileUser?.events
+              | paginate
+                : { itemsPerPage: postPerPage, currentPage: postPagination }
+          "
+          class="card"
+          style="width: 100%"
+        >
+          <div
+            class="card-header d-flex justify-content-between align-items-center"
+          >
+            <div>
+              <img
+                src="{{ baseUrl }}/avatar/{{ profileUser?.avatar }}"
+                class="ownerImage mr-2"
+                alt="ownerImage"
+              />
+
+              <strong
+                >{{ profileUser?.firstName }}
+                {{ profileUser?.lastName }}</strong
+              >
+            </div>
+            <div>
+              <span
+                *ngIf="profileUser?._id == decodedToken.userId"
+                (click)="openEdit(post)"
+                class="fa fa-edit editBtn p-1"
+              ></span>
+              <span
+                *ngIf="profileUser?._id == decodedToken.userId"
+                (click)="deletePost(post)"
+                class="fa fa-trash deleteBtn p-1"
+              ></span>
+            </div>
+          </div>
+          <img
+            (click)="openImageDialog(post)"
+            *ngIf="post.image"
+            class="card-img-top"
+            src="{{ baseUrl }}/event-pics/{{ post.image }}"
+            style="height: 200px"
+            alt="Card image cap"
+          />
+          <div class="card-body">
+            <h4>{{ post.title }}</h4>
+            <p class="card-text">{{ post.description }}</p>
+          </div>
+        </div>
+        <pagination-controls
+          (pageChange)="pageChangedDonnation($event)"
+          previousLabel="Previous"
+          nextLabel="Next"
+          style="text-align: center !important"
+        ></pagination-controls>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="p-1 py-2">
+        <div class="mt-2 ml-2">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input
+              type="text"
+              [(ngModel)]="globalFilter"
+              (keyup)="postFilter()"
+              pInputText
+              [(ngModel)]="filterValue"
+              placeholder="Search"
+            />
+          </span>
+          <div class="mt-2 postTypeContainer">
+            <hr />
+            <h4>Post type:</h4>
+            <div
+              *ngFor="let eventType of eventTypeList"
+              class="d-flex align-items-center"
+            >
+              <p-checkbox
+                (onChange)="filterChange()"
+                inputId="{{ eventType._id }}"
+                name="eventType.title"
+                label="{{ eventType.title }}"
+                value="{{ eventType._id }}"
+                [(ngModel)]="selectedValues"
+              ></p-checkbox>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<app-footer>
+  <span><a href="#">Pi Notice</a> &copy; 2020 Pi Notice.</span>
+  <span class="ml-auto">Powered by <a href="#">Pi Notice</a></span>
+</app-footer>
+
+<p-dialog
+  [(visible)]="showAdd"
+  [modal]="true"
+  [style]="{ width: '90%' }"
+  [baseZIndex]="100"
+  (onHide)="hideDialog()"
+>
+  <ng-template pTemplate="header">
+    <h3>Add new post</h3>
+  </ng-template>
+  <ng-template pTemplate="content">
+    <form [formGroup]="formgroup" class="mt-4 p-1">
+      <span class="p-float-label mb-4" style="width: 100%">
+        <input
+          [(ngModel)]="selectedPost.title"
+          style="width: 100%"
+          formControlName="title"
+          id="float-input"
+          type="text"
+          pInputText
+        />
+        <label for="float-input">title</label>
+      </span>
+      <span class="p-float-label mb-4 mt-4" style="width: 100%">
+        <textarea
+          [(ngModel)]="selectedPost.description"
+          style="width: 100%"
+          formControlName="description"
+          pInputTextarea
+        >
+        </textarea>
+        <label for="float-input">description</label>
+      </span>
+      <div class="row pl-3">
+        <label class="col-12 pl-0" for="">Post type:</label>
+        <select
+          [(ngModel)]="selectedPost.eventType"
+          class="form-select selectField form-select-lg mb-3 col-8"
+          formControlName="eventType"
+          aria-label=".form-select-lg example"
+        >
+          <option *ngFor="let type of eventTypeList" value="{{ type._id }}">
+            {{ type.title }}
+          </option>
+        </select>
+        <div class="col-4 pt-2">
+          <button
+            pButton
+            type="button"
+            (click)="openAddEventTypeDialog()"
+            class="p-element p-ripple p-button-outlined p-button-rounded p-button p-component addPostTpeBtn"
+          >
+            <span class="pi pi-plus"></span> &nbsp; Add new Post Type
+          </button>
+        </div>
+      </div>
+      <ng-container>
+        <label for="">Image:</label>
+        <p-fileUpload
+          class="mb-2"
+          accept="image/*"
+          (onSelect)="selectFile($event)"
+          (onClear)="clearFile($event)"
+          (onRemove)="clearFile($event)"
+          [showUploadButton]="false"
+          name="myfile[]"
+          url="./upload.php"
+        ></p-fileUpload>
+        <a
+          *ngIf="editData && selectedPost.image"
+          href=""
+          (click)="downloadFile(selectedPost.image)"
+          [download]="selectedPost.image"
+          ><span class="fa fa-download"></span> Download Image
+          <img
+            src="{{ baseUrl }}/event-pics/{{ selectedPost.image }}"
+            class="downloadImage"
+            alt=""
+        /></a>
+      </ng-container>
+    </form>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      style="color: red"
+      pRibble
+      class="p-button-text"
+      icon="pi pi-times"
+      (click)="hideDialog()"
+      label="Cancel"
+    ></button>
+    <button
+      *ngIf="!editData"
+      pButton
+      style="color: green"
+      pRibble
+      class="p-button-text"
+      (click)="submitData()"
+      icon="pi pi-check"
+      label="Add"
+    ></button>
+    <button
+      *ngIf="editData"
+      pButton
+      style="color: green"
+      pRibble
+      class="p-button-text"
+      (click)="submitData()"
+      icon="pi pi-check"
+      label="Update"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog
+  header="Confirmation"
+  icon="pi pi-exclamation-triangle"
+></p-confirmDialog>
+
+<p-dialog
+  [(visible)]="showEventTypeDialog"
+  [modal]="true"
+  [style]="{ width: '70%' }"
+  [baseZIndex]="100"
+  (onHide)="hideEventTypeDialog()"
+>
+  <ng-template pTemplate="header">
+    <h3>Add new post Type</h3>
+  </ng-template>
+  <ng-template pTemplate="content">
+    <div class="p4 row">
+      <label for="" class="col-12">Title:</label>
+      <input
+        type="text"
+        pInputText
+        class="col-12"
+        [(ngModel)]="eventTypeTitle"
+      />
+    </div>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      style="color: red"
+      pRibble
+      class="p-button-text"
+      icon="pi pi-times"
+      (click)="hideDialog()"
+      label="Cancel"
+    ></button>
+    <button
+      pButton
+      style="color: green"
+      pRibble
+      class="p-button-text"
+      (click)="addNewPostType()"
+      icon="pi pi-check"
+      label="Add"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="showUpdateProfile"
+  [modal]="true"
+  [style]="{ width: '70%' }"
+  [baseZIndex]="100"
+  (onHide)="hideDialog()"
+>
+  <ng-template pTemplate="header">
+    <h3>Update profile</h3>
+  </ng-template>
+  <ng-template pTemplate="content">
+    <form [formGroup]="userForm" class="pt-4">
+      <span class="p-float-label mb-4" style="width: 100%">
+        <input
+          style="width: 100%"
+          formControlName="firstName"
+          id="firstName"
+          type="text"
+          pInputText
+        />
+        <label for="firstName">firstName</label>
+      </span>
+      <span class="p-float-label mb-4" style="width: 100%">
+        <input
+          style="width: 100%"
+          formControlName="lastName"
+          id="lastName"
+          type="text"
+          pInputText
+        />
+        <label for="lastName">lastName</label>
+      </span>
+      <span class="p-float-label" style="width: 100%">
+        <input
+          style="width: 100%"
+          formControlName="email"
+          id="email"
+          type="email"
+          pInputText
+        />
+        <label for="email">Email</label>
+      </span>
+      <span class="mb-4" style="width: 100%">
+        <label style="font-size: 11px" for="birthDate">BirthDate:</label>
+        <p-calendar
+          class="calendarField"
+          dateFormat="dd/mm/yy"
+          [touchUI]="true"
+          [showIcon]="true"
+          yearRange="1970:2200"
+          [monthNavigator]="true"
+          [yearNavigator]="true"
+          formControlName="birthDate"
+        ></p-calendar>
+      </span>
+      <span class="p-float-label mt-4 mb-4" style="width: 100%">
+        <input
+          style="width: 100%"
+          formControlName="phone"
+          id="phone"
+          type="text"
+          pInputText
+        />
+        <label for="phone">Phone</label>
+      </span>
+      <span class="p-float-label mb-4" style="width: 100%">
+        <input
+          style="width: 100%"
+          formControlName="address"
+          id="address"
+          type="text"
+          pInputText
+        />
+        <label for="address">Address</label>
+      </span>
+    </form>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      style="color: red"
+      pRibble
+      class="p-button-text"
+      icon="pi pi-times"
+      (click)="hideDialog()"
+      label="Cancel"
+    ></button>
+    <button
+      pButton
+      style="color: green"
+      pRibble
+      class="p-button-text"
+      (click)="updateProfile()"
+      icon="pi pi-check"
+      label="Update"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  [(visible)]="showUpdateImage"
+  [modal]="true"
+  [style]="{ width: '70%' }"
+  [baseZIndex]="100"
+  (onHide)="hideDialog()"
+>
+  <ng-template pTemplate="header">
+    <h3>Update profile image</h3>
+  </ng-template>
+  <ng-template pTemplate="content">
+    <p-fileUpload
+      class="mb-2"
+      accept="image/*"
+      (onSelect)="seletProfileImage($event)"
+      (onClear)="clearProfileImage($event)"
+      (onRemove)="clearProfileImage($event)"
+      [showUploadButton]="false"
+      name="myfile[]"
+      url="./upload.php"
+    ></p-fileUpload>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      style="color: red"
+      pRibble
+      class="p-button-text"
+      icon="pi pi-times"
+      (click)="hideDialog()"
+      label="Cancel"
+    ></button>
+    <button
+      pButton
+      style="color: green"
+      pRibble
+      class="p-button-text"
+      (click)="updateProfileImage()"
+      icon="pi pi-check"
+      label="Update image"
+    ></button>
+  </ng-template>
+</p-dialog>
+<p-dialog
+  [(visible)]="showImage"
+  [modal]="true"
+  [style]="{ width: '90%' }"
+  [baseZIndex]="100"
+  (onHide)="hideDialog()"
+>
+  <ng-template pTemplate="content">
+    <div class="p4 dialogImageContainer row">
+      <img src="{{ baseUrl }}/event-pics/{{ selectedImageUrl }}" alt="" />
+    </div>
+  </ng-template>
+</p-dialog>
